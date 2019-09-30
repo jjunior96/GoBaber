@@ -26,10 +26,30 @@ class AppointmentContrller {
       });
     }
 
+    /**
+     * Verifica se a data informada é valida
+     * Permitida: data >= data atual
+     */
+
     const hourStart = startOfHour(parseISO(date));
 
     if (isBefore(hourStart, new Date())) {
       return res.status(400).json({ error: 'Data incorreta' });
+    }
+
+    /**
+     * Verifica disponibilidade da data
+     */
+    const verificaDisponibilidade = await Appointment.findOne({
+      where: {
+        provider_id,
+        canceled_at: null,
+        date: hourStart,
+      },
+    });
+
+    if (verificaDisponibilidade) {
+      return res.status(400).json({ error: 'Data nao disponivel' });
     }
 
     const appointment = await Appointment.create({
