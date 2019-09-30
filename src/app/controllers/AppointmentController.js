@@ -1,4 +1,5 @@
 import * as Yup from 'yup';
+import { startOfHour, parseISO, isBefore } from 'date-fns';
 import Appointment from '../models/Appointment';
 import User from '../models/User';
 
@@ -23,6 +24,12 @@ class AppointmentContrller {
       return res.status(401).json({
         error: 'Voce só pode criar um compromisso se for um provedor',
       });
+    }
+
+    const hourStart = startOfHour(parseISO(date));
+
+    if (isBefore(hourStart, new Date())) {
+      return res.status(400).json({ error: 'Data incorreta' });
     }
 
     const appointment = await Appointment.create({
